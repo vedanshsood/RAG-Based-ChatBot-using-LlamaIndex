@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🧠 LlamaIndex Chatbot</title>
+    <style>
+        body { background-color: #000; color: white; font-family: Arial, sans-serif; padding: 2rem; }
+        .chat-box { max-width: 700px; margin: auto; }
+        .message { margin-bottom: 1rem; padding: 0.7rem; border-radius: 10px; }
+        .user { background-color: #333; text-align: right; }
+        .bot { background-color: #555; text-align: left; }
+        input[type="text"], input[type="file"], button {
+            width: 100%; padding: 10px; margin-top: 10px; background-color: #222;
+            color: white; border: none; border-radius: 5px;
+        }
+        button:hover { background-color: #444; }
+    </style>
+</head>
+<body>
+    <div class="chat-box">
+        <h2>🧠 LlamaIndex Local Chatbot</h2>
+
+        {% for sender, msg in chat_history %}
+            <div class="message {{ 'user' if sender == 'You' else 'bot' }}">
+                <strong>{{ sender }}:</strong> {{ msg }}
+            </div>
+        {% endfor %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".pdf,.txt" />
+            <input type="text" name="message" placeholder="Ask something..." required />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>
