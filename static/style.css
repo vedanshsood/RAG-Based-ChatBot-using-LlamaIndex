@@ -1,0 +1,155 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+/* Chat Toggle Button */
+#chat-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #4a90e2;
+  color: white;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.2s;
+}
+#chat-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* Chat Window */
+#chat-window {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 999;
+}
+#chat-window.open {
+  display: flex;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+#chat-header {
+  background: #4a90e2;
+  color: white;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+/* Chat Area */
+#chat-box {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #f9f9f9;
+}
+
+/* Input Area */
+#chat-input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+#user-input {
+  flex-grow: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+#chat-input-container button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-left: 8px;
+  cursor: pointer;
+}
+
+/* Chat Bubbles */
+.chat-bubble {
+  max-width: 80%;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.user {
+  background: #dcf8c6;
+  align-self: flex-end;
+  text-align: right;
+}
+.bot {
+  background: #f1f0f0;
+  align-self: flex-start;
+  text-align: left;
+}
+
+/* Upload Section */
+#file-upload {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 998;
+}
+#upload-form {
+  display: flex;
+  gap: 10px;
+}
+#upload-form input[type="file"] {
+  border: 1px solid #ccc;
+  padding: 6px;
+  border-radius: 6px;
+}
+#upload-form button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+/* Typing Indicator */
+#typing-indicator {
+  display: none;
+  font-style: italic;
+  color: #666;
+  padding: 0 12px 10px;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease-in-out;
+}

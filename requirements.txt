@@ -1,4 +1,8 @@
+fastapi
+uvicorn
+python-multipart
 llama-index
-llama-cpp-python
-streamlit
-PyMuPDF
+torch
+transformers
+sentence-transformers
+pinecone-client

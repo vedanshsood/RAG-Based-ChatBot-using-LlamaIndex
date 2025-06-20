@@ -1,37 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>🧠 Local LLM Chatbot</title>
-    <style>
-        body { background-color: #000; color: white; font-family: Arial; padding: 20px; }
-        .chat-box { border: 1px solid #444; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
-        .user { text-align: right; background-color: #333; }
-        .bot { text-align: left; background-color: #555; }
-        .system { text-align: center; color: #bbb; }
-        .chat-box p { margin: 5px; padding: 5px; }
-        .input-form { margin-top: 20px; }
-        input[type="text"] { width: 80%; padding: 10px; }
-        input[type="submit"], input[type="file"] { padding: 10px; margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Document Chatbot</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-    <h1>🧠 Local LLM Chatbot</h1>
+  <!-- Floating Chat Icon -->
+  <div id="chat-toggle" onclick="toggleChat()">
+    💬
+  </div>
 
-    {% for sender, message in chat_history %}
-        <div class="chat-box {{ sender }}">
-            <p><strong>{{ sender.capitalize() }}:</strong> {{ message }}</p>
-        </div>
-    {% endfor %}
+  <!-- Chat Window -->
+  <div id="chat-window">
+    <div id="chat-header">
+      <span>📚 Doc Chat Assistant</span>
+      <button onclick="toggleChat()">×</button>
+    </div>
+    <div id="chat-box"></div>
 
-    <form class="input-form" action="/" method="post" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <br>
-        <input type="submit" value="Upload">
+    <!-- Typing Indicator -->
+    <div id="typing-indicator">
+      <span>Bot is thinking<span id="dots"></span></span>
+    </div>
+
+    <div id="chat-input-container">
+      <input type="text" id="user-input" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <!-- File Upload Section -->
+  <div id="file-upload">
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" name="file" id="fileInput" />
+      <button type="submit">📁 Upload Document</button>
     </form>
+  </div>
 
-    <form class="input-form" action="/" method="post">
-        <input type="text" name="message" placeholder="Ask something..." required>
-        <input type="submit" value="Send">
-    </form>
+  <script>
+    let typingInterval;
+
+    function toggleChat() {
+      document.getElementById("chat-window").classList.toggle("open");
+    }
+
+    function showTypingIndicator() {
+      const indicator = document.getElementById("typing-indicator");
+      const dots = document.getElementById("dots");
+      indicator.style.display = "block";
+      let count = 0;
+      typingInterval = setInterval(() => {
+        count = (count + 1) % 4;
+        dots.textContent = '.'.repeat(count);
+      }, 500);
+    }
+
+    function hideTypingIndicator() {
+      clearInterval(typingInterval);
+      document.getElementById("typing-indicator").style.display = "none";
+      document.getElementById("dots").textContent = '';
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML += `<div class="chat-bubble user">${msg}</div>`;
+      input.value = "";
+
+      showTypingIndicator();
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        body: new URLSearchParams({ message: msg })
+      });
+
+      const data = await response.json();
+      hideTypingIndicator();
+
+      chatBox.innerHTML += `<div class="chat-bubble bot">${data.response}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("upload-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch("/upload", { method: "POST", body: formData });
+      const result = await res.json();
+      alert(result.message);
+      e.target.reset();
+    });
+  </script>
 </body>
 </html>
