@@ -22,12 +22,13 @@ project-root/
 │
 ├── chatbot app/
 │   ├── main.py              # FastAPI backend logic
+    ├── chat_logic.py        # Chatbot Logic
 │   ├── templates/
 │   │   └── index.html       # Frontend HTML interface
 │   └── static/
 │       └── style.css        # Styles for the chat UI
 │
-├── uploads/                 # Uploaded documents (optional)
+├── docs/                    # Uploaded documents (optional)
 └── README.md                # Project documentation
 ```
 
@@ -38,7 +39,7 @@ project-root/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/document-chatbot.git
+git clone https://github.com/vedanshsood/document-chatbot.git
 cd document-chatbot
 ```
 
