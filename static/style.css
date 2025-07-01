@@ -1,8 +1,10 @@
 body {
   font-family: 'Segoe UI', sans-serif;
-  background: #f4f4f4;
+  background: #f0f2f5;
   margin: 0;
   padding: 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* Chat Toggle Button */
@@ -10,7 +12,7 @@ body {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #4a90e2;
+  background: #1da1f2;
   color: white;
   width: 60px;
   height: 60px;
@@ -37,7 +39,7 @@ body {
   height: 500px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   display: none;
   flex-direction: column;
   overflow: hidden;
@@ -61,13 +63,41 @@ body {
 
 /* Header */
 #chat-header {
-  background: #4a90e2;
+  background: #1da1f2;
   color: white;
   padding: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+}
+
+/* Session Controls */
+#session-controls {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #e1e8ed;
+}
+#session-select {
+  flex-grow: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+#session-controls button {
+  background: #1da1f2;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+#session-controls button:hover {
+  background: #1991db;
 }
 
 /* Chat Area */
@@ -82,22 +112,24 @@ body {
 #chat-input-container {
   display: flex;
   padding: 10px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #e1e8ed;
 }
 #user-input {
   flex-grow: 1;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 #chat-input-container button {
-  background: #4a90e2;
+  background: #1da1f2;
   color: white;
   border: none;
   padding: 10px 14px;
   border-radius: 8px;
   margin-left: 8px;
   cursor: pointer;
+  font-size: 14px;
 }
 
 /* Chat Bubbles */
@@ -110,40 +142,137 @@ body {
   line-height: 1.4;
 }
 .user {
-  background: #dcf8c6;
+  background: #d4edda;
   align-self: flex-end;
   text-align: right;
+  margin-left: auto;
 }
 .bot {
-  background: #f1f0f0;
+  background: #e9ecef;
   align-self: flex-start;
   text-align: left;
 }
 
-/* Upload Section */
+/* Main Content Layout */
+#main-content {
+  display: flex;
+  justify-content: space-between;
+  width: 1200px;
+  margin: 20px auto;
+  gap: 20px;
+}
+
+/* Upload Files Section */
 #file-upload {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 998;
+  flex: 1;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#file-upload h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
 }
 #upload-form {
   display: flex;
   gap: 10px;
+  margin-bottom: 15px;
 }
 #upload-form input[type="file"] {
-  border: 1px solid #ccc;
+  flex-grow: 1;
   padding: 6px;
+  border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 14px;
 }
 #upload-form button {
-  background: #4caf50;
+  background: #28a745;
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
 }
+#upload-form button:hover {
+  background: #218838;
+}
+#uploaded-documents-container {
+  margin-top: 10px;
+}
+#uploaded-documents-container h4 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  color: #555;
+}
+
+/* Chat Sessions Section */
+#session-list-container {
+  flex: 1;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#session-list-container h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Shared Table Styles */
+#file-list-table, #session-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#file-list-table thead, #session-list-table thead {
+  background: #f5f8fa;
+}
+#file-list-table th, #session-list-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #657786;
+  border-bottom: 1px solid #e1e8ed;
+}
+#file-list-table td, #session-list-table td {
+  padding: 12px 15px;
+  text-align: left;
+  color: #1c2526;
+  border-bottom: 1px solid #e1e8ed;
+}
+#file-list-table tr:hover, #session-list-table tr:hover {
+  background: #f0f2f5;
+}
+
+/* Rename Input */
+.rename-input {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+/* Delete Button */
+.delete-btn {
+  background-color: #e0245e;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.delete-btn:hover {
+  background-color: #d81b5c;
+}
+
 /* Typing Indicator */
 #typing-indicator {
   display: none;

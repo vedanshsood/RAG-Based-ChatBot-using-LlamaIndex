@@ -8,15 +8,19 @@
 </head>
 <body>
   <!-- Floating Chat Icon -->
-  <div id="chat-toggle" onclick="toggleChat()">
-    💬
-  </div>
+  <div id="chat-toggle" onclick="toggleChat()">💬</div>
 
   <!-- Chat Window -->
   <div id="chat-window">
     <div id="chat-header">
       <span>📚 Doc Chat Assistant</span>
       <button onclick="toggleChat()">×</button>
+    </div>
+    <div id="session-controls">
+      <select id="session-select" onchange="loadSession()">
+        <option value="">Select a session</option>
+      </select>
+      <button onclick="newSession()">New Session</button>
     </div>
     <div id="chat-box"></div>
 
@@ -26,21 +30,59 @@
     </div>
 
     <div id="chat-input-container">
-      <input type="text" id="user-input" placeholder="Type a message..." />
+      <input type="text" id="user-input" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage()" />
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
 
-  <!-- File Upload Section -->
-  <div id="file-upload">
-    <form id="upload-form" enctype="multipart/form-data">
-      <input type="file" name="file" id="fileInput" />
-      <button type="submit">📁 Upload Document</button>
-    </form>
+  <!-- Main Content Layout -->
+  <div id="main-content">
+    <!-- Upload Files Section -->
+    <div id="file-upload">
+      <h3>📁 Upload Files</h3>
+      <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" />
+        <button type="submit">Upload Document</button>
+      </form>
+      <div id="uploaded-documents-container">
+        <h4>Uploaded Documents</h4>
+        <table id="file-list-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>File Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="file-list-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chat Sessions Section -->
+    <div id="session-list-container">
+      <h3>💬 Chat Sessions</h3>
+      <table id="session-list-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Session Name</th>
+            <th>Created At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="session-list-body">
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     let typingInterval;
+    let currentSessionId = null;
 
     function toggleChat() {
       document.getElementById("chat-window").classList.toggle("open");
@@ -71,6 +113,7 @@
       const chatBox = document.getElementById("chat-box");
       chatBox.innerHTML += `<div class="chat-bubble user">${msg}</div>`;
       input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
 
       showTypingIndicator();
 
@@ -84,6 +127,154 @@
 
       chatBox.innerHTML += `<div class="chat-bubble bot">${data.response}</div>`;
       chatBox.scrollTop = chatBox.scrollHeight;
+      await refreshSessionList();
+    }
+
+    async function refreshFileList() {
+      const response = await fetch("/files");
+      const { files } = await response.json();
+      const tableBody = document.getElementById("file-list-body");
+      tableBody.innerHTML = "";
+
+      files.forEach((filename, idx) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${filename}</td>
+          <td>
+            <button class="delete-btn" onclick="deleteFile('${filename}')">🗑️</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    async function deleteFile(filename) {
+      const formData = new FormData();
+      formData.append("filename", filename);
+
+      const res = await fetch("/delete", {
+        method: "DELETE",
+        body: formData
+      });
+
+      const result = await res.json();
+      alert(result.message || result.error);
+      await refreshFileList();
+    }
+
+    async function refreshSessionList() {
+      const response = await fetch("/sessions");
+      const { sessions } = await response.json();
+      const select = document.getElementById("session-select");
+      const tableBody = document.getElementById("session-list-body");
+      select.innerHTML = `<option value="">Select a session</option>`;
+      tableBody.innerHTML = "";
+
+      sessions.forEach((session, idx) => {
+        const option = document.createElement("option");
+        option.value = session.id;
+        option.textContent = `${session.name} (${new Date(session.created_at).toLocaleString()})`;
+        select.appendChild(option);
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>
+            <span class="session-name" onclick="editSessionName(${session.id}, event)">${session.name}</span>
+            <input type="text" class="rename-input" id="rename-${session.id}" style="display: none;" onkeypress="if(event.key === 'Enter') saveSessionName(${session.id})">
+          </td>
+          <td>${new Date(session.created_at).toLocaleString()}</td>
+          <td>
+            <button class="delete-btn" onclick="deleteSession(${session.id})">🗑️</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      if (currentSessionId) {
+        select.value = currentSessionId;
+      }
+    }
+
+    async function newSession() {
+      currentSessionId = null;
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML = "";
+      document.getElementById("session-select").value = "";
+      await refreshSessionList();
+    }
+
+    async function loadSession() {
+      const sessionId = document.getElementById("session-select").value;
+      if (!sessionId) {
+        currentSessionId = null;
+        document.getElementById("chat-box").innerHTML = "";
+        return;
+      }
+
+      currentSessionId = sessionId;
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML = "";
+
+      const formData = new FormData();
+      formData.append("session_id", sessionId);
+      const response = await fetch("/load_session", {
+        method: "POST",
+        body: formData
+      });
+      const { chat_history } = await response.json();
+
+      chat_history.forEach(msg => {
+        const roleClass = msg.role === "user" ? "user" : "bot";
+        chatBox.innerHTML += `<div class="chat-bubble ${roleClass}">${msg.content}</div>`;
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function deleteSession(sessionId) {
+      const formData = new FormData();
+      formData.append("session_id", sessionId);
+      const res = await fetch("/delete_session", {
+        method: "DELETE",
+        body: formData
+      });
+      const result = await res.json();
+      alert(result.message);
+      if (currentSessionId == sessionId) {
+        await newSession();
+      } else {
+        await refreshSessionList();
+      }
+    }
+
+    function editSessionName(sessionId, event) {
+      event.stopPropagation();
+      const nameSpan = document.querySelector(`#session-list-body .session-name`);
+      const input = document.getElementById(`rename-${sessionId}`);
+      nameSpan.style.display = 'none';
+      input.style.display = 'inline';
+      input.value = nameSpan.textContent;
+      input.focus();
+    }
+
+    async function saveSessionName(sessionId) {
+      const input = document.getElementById(`rename-${sessionId}`);
+      const newName = input.value.trim();
+      if (newName) {
+        const formData = new FormData();
+        formData.append("session_id", sessionId);
+        formData.append("new_name", newName);
+        const response = await fetch("/rename_session", {
+          method: "POST",
+          body: formData
+        });
+        const result = await response.json();
+        alert(result.message);
+        await refreshSessionList();
+      }
+      input.style.display = 'none';
+      document.querySelector(`#session-list-body .session-name`).style.display = 'inline';
     }
 
     document.getElementById("upload-form").addEventListener("submit", async (e) => {
@@ -91,9 +282,17 @@
       const formData = new FormData(e.target);
       const res = await fetch("/upload", { method: "POST", body: formData });
       const result = await res.json();
-      alert(result.message);
+      alert(result.message || result.error);
       e.target.reset();
+      await refreshFileList();
     });
+
+    window.onload = async () => {
+      await refreshFileList();
+      await refreshSessionList();
+      document.getElementById("chat-box").innerHTML = "";
+      document.getElementById("session-select").value = "";
+    };
   </script>
 </body>
 </html>
